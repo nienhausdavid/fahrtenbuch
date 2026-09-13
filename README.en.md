@@ -196,14 +196,23 @@ bench --site <your-site> uninstall-app fahrtenbuch
   dependency.
 - The Project form now has a "Trips" group under its connections
   (additive via `override_doctype_dashboards`, extends the existing list
-  instead of replacing it). Its "+" button creates a new trip with the timer
-  already running (project/customer pre-filled, start time = now) — via
+  instead of replacing it). Its "+" button creates a new trip — via
   `frm.make_methods` (Frappe's own extension point for `Form.make_new()`)
   instead of the default behaviour, which would only pre-fill the project
   field. There's also a dedicated, always-visible **"Fahrt mit Timer
   starten"** ("Start a Trip with Timer") button at the top of the form
   (`frm.page.add_button`, doesn't collapse into the "..." menu) with the
   same effect.
+- Both paths create the trip with the timer running by default
+  (project/customer pre-filled, start time = now, saved immediately) **and**
+  then immediately open the camera for the start odometer photo
+  (`frappe.ui.Capture` — the same class used by the camera button in the
+  regular attach dialog; on a phone this opens the camera app right away, on
+  desktop the webcam stream). Both are individually toggleable in
+  **"Fahrtenbuch Einstellungen"** → "Fahrt aus Projekt anlegen" ("Create Trip
+  from Project"): "Timer automatisch starten" ("Start Timer Automatically")
+  and "Kamera automatisch öffnen" ("Open Camera Automatically") — both on by
+  default.
 
 ## Own App in the Desk
 

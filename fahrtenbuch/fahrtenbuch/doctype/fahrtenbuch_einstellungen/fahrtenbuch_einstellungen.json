@@ -9,7 +9,10 @@
   "model",
   "api_key",
   "section_break_abrechnung",
-  "time_item"
+  "time_item",
+  "section_break_projekt",
+  "auto_start_timer",
+  "auto_open_camera"
  ],
  "fields": [
   {
@@ -41,6 +44,25 @@
    "fieldtype": "Link",
    "label": "Artikel Fahrzeit",
    "options": "Item"
+  },
+  {
+   "fieldname": "section_break_projekt",
+   "fieldtype": "Section Break",
+   "label": "Fahrt aus Projekt anlegen"
+  },
+  {
+   "default": "1",
+   "description": "Beim Anlegen einer Fahrt über die Verknüpfung im Projekt sofort die Startzeit setzen und speichern (Timer läuft direkt)",
+   "fieldname": "auto_start_timer",
+   "fieldtype": "Check",
+   "label": "Timer automatisch starten"
+  },
+  {
+   "default": "1",
+   "description": "Beim Anlegen einer Fahrt über die Verknüpfung im Projekt sofort die Kamera für das Start-Kilometerstand-Foto öffnen",
+   "fieldname": "auto_open_camera",
+   "fieldtype": "Check",
+   "label": "Kamera automatisch öffnen"
   }
  ],
  "index_web_pages_for_search": 1,

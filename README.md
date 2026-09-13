@@ -201,13 +201,20 @@ bench --site <deine-site> uninstall-app fahrtenbuch
 - Im Projekt-Formular gibt es unter "Verknüpfungen" jetzt eine Gruppe
   "Fahrten" (additiv über `override_doctype_dashboards`, ergänzt die
   bestehende Liste statt sie zu ersetzen). Die "+"-Verknüpfung dort legt eine
-  neue Fahrt mit bereits laufendem Timer an (Projekt/Kunde vorbelegt,
-  Startzeit = jetzt) — über `frm.make_methods` (Frappes eigener
+  neue Fahrt an — über `frm.make_methods` (Frappes eigener
   Erweiterungspunkt für `Form.make_new()`) statt der Standard-Vorbelegung,
   die nur das Projekt-Feld setzen würde. Zusätzlich ein eigenständig
   sichtbarer Button **"Fahrt mit Timer starten"** oben im Formular
   (`frm.page.add_button`, landet nicht in der "..."-Sammelablage) mit
   demselben Effekt.
+- Beide Wege legen die Fahrt standardmäßig mit bereits laufendem Timer an
+  (Projekt/Kunde vorbelegt, Startzeit = jetzt, sofort gespeichert) **und**
+  öffnen direkt danach die Kamera für das Start-Kilometerstand-Foto
+  (`frappe.ui.Capture` — dieselbe Klasse, die auch der Kamera-Knopf im
+  normalen Anhänge-Dialog nutzt; auf dem Handy öffnet das sofort die
+  Kamera-App, am Desktop den Webcam-Stream). Beides einzeln abschaltbar in
+  **"Fahrtenbuch Einstellungen"** → "Fahrt aus Projekt anlegen": "Timer
+  automatisch starten" und "Kamera automatisch öffnen" (Standard: beide an).
 
 ## Eigene App im Desk
 

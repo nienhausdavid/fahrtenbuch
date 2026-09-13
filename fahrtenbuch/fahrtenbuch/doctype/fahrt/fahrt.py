@@ -20,9 +20,13 @@ class Fahrt(Document):
 			# Kein frappe.throw hier, wenn end < start: waehrend eines Entwurfs
 			# (z. B. nach einem falschen OCR-Treffer, den man noch korrigieren
 			# will) darf das Speichern nicht blockiert sein - nur das Buchen
-			# selbst (siehe before_submit unten). distance_km zeigt in dem
-			# Fall einfach eine negative Zahl an, als Hinweis statt als Fehler.
-			self.distance_km = self.end_odometer - self.start_odometer
+			# selbst (siehe before_submit unten). Trotzdem darf hier keine
+			# negative Zahl im Feld stehen bleiben - bis der Endstand korrigiert
+			# ist, bleibt distance_km einfach leer statt falsch/negativ.
+			if self.end_odometer >= self.start_odometer:
+				self.distance_km = self.end_odometer - self.start_odometer
+			else:
+				self.distance_km = None
 
 	def before_submit(self):
 		"""Was zum Buchen fehlen darf, aber nicht zum Buchen selbst: hier statt
