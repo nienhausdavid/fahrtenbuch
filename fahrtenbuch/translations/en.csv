@@ -29,3 +29,6 @@
 "Kilometerstand wird erkannt...","Recognizing odometer reading..."
 "Kilometerstand erkannt: {0}","Odometer reading recognized: {0}"
 "Konnte den Kilometerstand nicht erkennen, bitte manuell eintragen.","Could not recognize the odometer reading, please enter it manually."
+"Timer starten","Start Timer"
+"Timer stoppen","Stop Timer"
+"Timer läuft: {0}","Timer running: {0}"

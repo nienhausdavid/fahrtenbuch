@@ -7,6 +7,20 @@
 
 frappe.ui.form.on('Fahrt', {
 	onload(frm) {
+		// Auftrag/Projekt auf den gewaehlten Kunden einschraenken (Auftrag
+		// zusaetzlich auf das gewaehlte Projekt, falls gesetzt). Dynamischer
+		// Filter - wird bei jedem Oeffnen des Dropdowns neu anhand des
+		// aktuellen frm.doc ausgewertet.
+		frm.set_query('project', () => {
+			return frm.doc.customer ? { filters: { customer: frm.doc.customer } } : {};
+		});
+		frm.set_query('sales_order', () => {
+			const filters = {};
+			if (frm.doc.customer) filters.customer = frm.doc.customer;
+			if (frm.doc.project) filters.project = frm.doc.project;
+			return { filters };
+		});
+
 		if (!frm.is_new()) return;
 		if (!frm.doc.employee) {
 			frappe.db.get_value('Employee', { user_id: frappe.session.user, status: 'Active' }, 'name')
@@ -14,7 +28,10 @@ frappe.ui.form.on('Fahrt', {
 					if (r.message && r.message.name) frm.set_value('employee', r.message.name);
 				});
 		}
-		if (!frm.doc.start_time) frm.set_value('start_time', frappe.datetime.now_datetime());
+		// Kein automatischer Default fuer start_time mehr - das uebernimmt
+		// jetzt der Timer (oder die manuelle Eingabe). Ein Default hier wuerde
+		// bei Formularoeffnung den falschen Zeitpunkt festlegen, falls der
+		// Techniker erst spaeter tatsaechlich losfaehrt.
 	},
 
 	site_visit(frm) {
@@ -30,6 +47,26 @@ frappe.ui.form.on('Fahrt', {
 			});
 	},
 
+	project(frm) {
+		// Kunde aus dem gewaehlten Projekt uebernehmen, falls noch leer -
+		// der Techniker soll das nicht doppelt eintragen muessen.
+		if (!frm.doc.project || frm.doc.customer) return;
+		frappe.db.get_value('Project', frm.doc.project, 'customer').then((r) => {
+			if (r.message && r.message.customer) frm.set_value('customer', r.message.customer);
+		});
+	},
+
+	sales_order(frm) {
+		// Kunde (und, falls noch leer, Projekt) aus dem gewaehlten Auftrag
+		// uebernehmen - derselbe Grund wie bei project().
+		if (!frm.doc.sales_order) return;
+		frappe.db.get_value('Sales Order', frm.doc.sales_order, ['customer', 'project']).then((r) => {
+			if (!r.message) return;
+			if (r.message.customer && !frm.doc.customer) frm.set_value('customer', r.message.customer);
+			if (r.message.project && !frm.doc.project) frm.set_value('project', r.message.project);
+		});
+	},
+
 	start_odometer_photo(frm) {
 		fetch_odometer_reading(frm, 'start_odometer_photo', 'start_odometer');
 	},
@@ -40,6 +77,7 @@ frappe.ui.form.on('Fahrt', {
 
 	refresh(frm) {
 		frm.dashboard.clear_headline();
+		update_timer_toolbar(frm);
 		if (frm.doc.start_odometer && frm.doc.end_odometer && frm.doc.distance_km) {
 			frm.dashboard.set_headline_alert(
 				__('Strecke: {0} km, Dauer: {1} Std.', [frm.doc.distance_km, frm.doc.duration_hours]),
@@ -48,6 +86,46 @@ frappe.ui.form.on('Fahrt', {
 		}
 	},
 });
+
+// Timer fuer die Fahrzeit - reine Komfortfunktion obendrauf auf start_time/
+// end_time, die ganz normale, jederzeit von Hand editierbare Felder bleiben
+// (kein read-only). "Start" setzt start_time auf jetzt, "Stopp" end_time auf
+// jetzt; dazwischen laeuft eine Live-Anzeige der verstrichenen Zeit.
+function update_timer_toolbar(frm) {
+	stop_ticking(frm);
+	if (frm.doc.docstatus !== 0) return;
+
+	if (!frm.doc.start_time) {
+		frm.add_custom_button(__('Timer starten'), () => {
+			frm.set_value('start_time', frappe.datetime.now_datetime()).then(() => update_timer_toolbar(frm));
+		});
+	} else if (!frm.doc.end_time) {
+		frm.add_custom_button(__('Timer stoppen'), () => {
+			frm.set_value('end_time', frappe.datetime.now_datetime()).then(() => update_timer_toolbar(frm));
+		});
+		start_ticking(frm);
+	}
+}
+
+function start_ticking(frm) {
+	const started_at = frappe.datetime.str_to_obj(frm.doc.start_time).getTime();
+	const tick = () => {
+		const total_seconds = Math.max(0, Math.floor((Date.now() - started_at) / 1000));
+		const h = String(Math.floor(total_seconds / 3600)).padStart(2, '0');
+		const m = String(Math.floor((total_seconds % 3600) / 60)).padStart(2, '0');
+		const s = String(total_seconds % 60).padStart(2, '0');
+		frm.dashboard.set_headline_alert(__('Timer läuft: {0}', [`${h}:${m}:${s}`]), 'orange');
+	};
+	tick();
+	frm.__fahrtenbuch_timer = setInterval(tick, 1000);
+}
+
+function stop_ticking(frm) {
+	if (frm.__fahrtenbuch_timer) {
+		clearInterval(frm.__fahrtenbuch_timer);
+		frm.__fahrtenbuch_timer = null;
+	}
+}
 
 function fetch_odometer_reading(frm, photo_field, odometer_field) {
 	const file_url = frm.doc[photo_field];
