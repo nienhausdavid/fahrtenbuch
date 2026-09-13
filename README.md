@@ -32,6 +32,7 @@ fahrtenbuch/
     ├── patches.txt
     ├── public/
     │   ├── js/fahrtenbuch.js        # Feld-Defaults, Site-Visit-Uebernahme, OCR-Trigger
+    │   ├── js/fahrtenbuch_einstellungen.js  # "Modelle abrufen"-Button
     │   └── images/fahrtenbuch-logo.svg
     ├── translations/
     │   └── en.csv                # Englische Uebersetzung (App-Ebene, nicht im Modulordner!)
@@ -89,9 +90,15 @@ Awesomebar) und ausfüllen:
 
 - **API-URL**: Basis-URL ohne `/chat/completions` am Ende, z. B.
   `http://<ip-des-servers>:11434/v1` für Ollama oder `https://api.openai.com/v1`
-- **Modell**: z. B. `qwen3.5:9b`
+- **Modell**: z. B. `qwen3.5:9b` — Button **"Verfügbare Modelle abrufen"**
+  fragt die eingetragene API direkt nach den dort tatsächlich vorhandenen
+  Modellen (`GET .../models`, Teil des OpenAI-Standards) und zeigt sie zur
+  Auswahl an, testet dabei auch eine gerade eingetippte, noch nicht
+  gespeicherte API-URL
 - **API-Schlüssel**: nur nötig, falls die API einen verlangt (bei den meisten
   lokal/selbst gehosteten Servern leer lassen)
+- **Artikel Fahrzeit**: Vorbelegung für das gleichnamige Pflichtfeld auf einer
+  neuen Fahrt — bleibt dort weiterhin pro Fahrt änderbar
 
 **Keine Standardwerte hinterlegt** — ohne Eintrag bleibt die automatische
 Erkennung schlicht deaktiviert. Ist die API nicht erreichbar/nicht

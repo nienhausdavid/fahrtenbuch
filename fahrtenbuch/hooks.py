@@ -31,6 +31,7 @@ add_to_apps_screen = [
 # ---------------------------------------------------------------------------
 doctype_js = {
 	"Fahrt": "public/js/fahrtenbuch.js",
+	"Fahrtenbuch Einstellungen": "public/js/fahrtenbuch_einstellungen.js",
 }
 
 # ---------------------------------------------------------------------------

@@ -64,6 +64,16 @@ def get_odometer_reading(file_url):
 	return read_odometer(file_url)
 
 
+@frappe.whitelist()
+def get_available_models(api_url=None, api_key=None):
+	"""Fuer den "Modelle abrufen"-Button in Fahrtenbuch Einstellungen -
+	api_url/api_key optional, damit ein gerade eingetipptes, noch nicht
+	gespeichertes Feld direkt getestet werden kann."""
+	from fahrtenbuch.fahrtenbuch.ocr import list_models
+
+	return list_models(api_url=api_url, api_key=api_key)
+
+
 def check_app_permission():
 	"""Fuer add_to_apps_screen in hooks.py: wer die App-Kachel im Desk sehen darf."""
 	if frappe.session.user == "Administrator":

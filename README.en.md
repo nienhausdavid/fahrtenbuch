@@ -31,6 +31,7 @@ fahrtenbuch/
     ├── patches.txt
     ├── public/
     │   ├── js/fahrtenbuch.js        # field defaults, Site Visit lookup, OCR trigger
+    │   ├── js/fahrtenbuch_einstellungen.js  # "Fetch Available Models" button
     │   └── images/fahrtenbuch-logo.svg
     ├── translations/
     │   └── en.csv                # English translation (app level, not inside the module folder!)
@@ -88,9 +89,14 @@ the awesomebar) and fill in:
 
 - **API URL**: base URL without `/chat/completions` at the end, e.g.
   `http://<server-ip>:11434/v1` for Ollama or `https://api.openai.com/v1`
-- **Model**: e.g. `qwen3.5:9b`
+- **Model**: e.g. `qwen3.5:9b` — the **"Fetch Available Models"** button asks
+  the configured API directly which models it actually has (`GET
+  .../models`, part of the OpenAI standard) and shows them to pick from; also
+  tests an API URL you just typed but haven't saved yet
 - **API Key**: only needed if the API requires one (leave empty for most
   local/self-hosted servers)
+- **Artikel Fahrzeit** (Time Item): default for the same-named required field
+  on a new trip — stays changeable per trip there
 
 **No defaults are shipped** — without an entry, automatic recognition is
 simply disabled. If the API is unreachable/not configured or doesn't

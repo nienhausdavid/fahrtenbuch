@@ -20,6 +20,9 @@ frappe.ui.form.on('Fahrt', {
 			if (frm.doc.project) filters.project = frm.doc.project;
 			return { filters };
 		});
+		frm.set_query('site_visit', () => {
+			return frm.doc.customer ? { filters: { customer: frm.doc.customer } } : {};
+		});
 
 		if (!frm.is_new()) return;
 		if (!frm.doc.employee) {
@@ -27,6 +30,11 @@ frappe.ui.form.on('Fahrt', {
 				.then((r) => {
 					if (r.message && r.message.name) frm.set_value('employee', r.message.name);
 				});
+		}
+		if (!frm.doc.time_item) {
+			frappe.db.get_single_value('Fahrtenbuch Einstellungen', 'time_item').then((value) => {
+				if (value) frm.set_value('time_item', value);
+			});
 		}
 		// Kein automatischer Default fuer start_time mehr - das uebernimmt
 		// jetzt der Timer (oder die manuelle Eingabe). Ein Default hier wuerde
@@ -114,6 +122,10 @@ function start_ticking(frm) {
 		const h = String(Math.floor(total_seconds / 3600)).padStart(2, '0');
 		const m = String(Math.floor((total_seconds % 3600) / 60)).padStart(2, '0');
 		const s = String(total_seconds % 60).padStart(2, '0');
+		// clear_headline() zuerst: show_message() im Frappe-Layout haengt bei
+		// jedem Aufruf nur einen neuen Block an, statt den alten zu ersetzen -
+		// ohne das Clear stapeln sich die Meldungen im Sekundentakt.
+		frm.dashboard.clear_headline();
 		frm.dashboard.set_headline_alert(__('Timer läuft: {0}', [`${h}:${m}:${s}`]), 'orange');
 	};
 	tick();

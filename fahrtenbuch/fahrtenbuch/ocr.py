@@ -3,12 +3,47 @@ import re
 
 import frappe
 import requests
+from frappe import _
 
 PROMPT = (
 	"This is a photo of a car odometer (mileage display). What is the total "
 	"number of kilometers shown? Ignore any small decimal/tenths digit shown "
 	"in a different color. Respond with only the digits, nothing else."
 )
+
+
+def _auth_headers(settings) -> dict:
+	api_key = settings.get_password("api_key", raise_exception=False)
+	return {"Authorization": f"Bearer {api_key}"} if api_key else {}
+
+
+def list_models(api_url: str | None = None, api_key: str | None = None) -> list[str]:
+	"""Fragt eine OpenAI-kompatible API nach den dort tatsaechlich
+	verfuegbaren Modellen (GET .../models - Teil des OpenAI-Standards, den
+	auch Ollama & Co. darueber mit anbieten).
+
+	api_url/api_key optional: fuer den "Modelle abrufen"-Button in
+	Fahrtenbuch Einstellungen, damit ein gerade eingetipptes, noch nicht
+	gespeichertes Feld direkt getestet werden kann. Ohne Angabe wird der
+	bereits gespeicherte Stand aus den Einstellungen verwendet."""
+	settings = frappe.get_cached_doc("Fahrtenbuch Einstellungen")
+	api_url = api_url or settings.api_url
+	if not api_url:
+		frappe.throw(_("Bitte zuerst eine API-URL eintragen."))
+
+	headers = {}
+	key = api_key or settings.get_password("api_key", raise_exception=False)
+	if key:
+		headers["Authorization"] = f"Bearer {key}"
+
+	try:
+		response = requests.get(f"{api_url.rstrip('/')}/models", headers=headers, timeout=15)
+		response.raise_for_status()
+		data = response.json()
+	except requests.RequestException:
+		frappe.throw(_("Die API war nicht erreichbar."))
+
+	return sorted(m["id"] for m in data.get("data", []) if m.get("id"))
 
 
 def read_odometer(file_url: str) -> int | None:
@@ -30,10 +65,7 @@ def read_odometer(file_url: str) -> int | None:
 	with open(file_doc.get_full_path(), "rb") as f:
 		image_b64 = base64.b64encode(f.read()).decode()
 
-	headers = {"Content-Type": "application/json"}
-	api_key = settings.get_password("api_key", raise_exception=False)
-	if api_key:
-		headers["Authorization"] = f"Bearer {api_key}"
+	headers = {"Content-Type": "application/json", **_auth_headers(settings)}
 
 	try:
 		response = requests.post(
