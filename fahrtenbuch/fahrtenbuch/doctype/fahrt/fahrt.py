@@ -17,8 +17,11 @@ class Fahrt(Document):
 			self.duration_hours = flt(time_diff_in_hours(self.end_time, self.start_time), 2)
 
 		if self.start_odometer is not None and self.end_odometer is not None:
-			if self.end_odometer < self.start_odometer:
-				frappe.throw(_("Der Kilometerstand am Ende darf nicht kleiner als am Anfang sein."))
+			# Kein frappe.throw hier, wenn end < start: waehrend eines Entwurfs
+			# (z. B. nach einem falschen OCR-Treffer, den man noch korrigieren
+			# will) darf das Speichern nicht blockiert sein - nur das Buchen
+			# selbst (siehe before_submit unten). distance_km zeigt in dem
+			# Fall einfach eine negative Zahl an, als Hinweis statt als Fehler.
 			self.distance_km = self.end_odometer - self.start_odometer
 
 	def before_submit(self):
@@ -29,6 +32,8 @@ class Fahrt(Document):
 			frappe.throw(_("Bitte vor dem Buchen eine Endzeit eintragen."))
 		if self.start_odometer is None or self.end_odometer is None:
 			frappe.throw(_("Bitte vor dem Buchen beide Kilometerstände eintragen."))
+		if self.end_odometer < self.start_odometer:
+			frappe.throw(_("Der Kilometerstand am Ende darf nicht kleiner als am Anfang sein."))
 		if not self.sales_order:
 			frappe.throw(_("Bitte vor dem Buchen einen Auftrag wählen."))
 		if not self.time_item:
