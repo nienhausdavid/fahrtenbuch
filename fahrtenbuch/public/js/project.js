@@ -64,10 +64,50 @@ function capture_photo_for_field(frm, fieldname) {
 	// frappe.ui.Capture zeigt dann selbst eine Fehlermeldung (options.error).
 	const capture = new frappe.ui.Capture({ animate: false, error: true });
 	capture.show();
+	hide_and_cleanup_mobile_capture_input(capture);
 	capture.submit((data_urls) => {
 		if (!data_urls || !data_urls.length) return;
 		upload_captured_image(frm, fieldname, data_urls[0]);
 	});
+}
+
+function hide_and_cleanup_mobile_capture_input(capture) {
+	// Workaround fuer einen Kern-Bug in frappe.ui.Capture (capture.js): auf
+	// dem Handy haengt es ein <input type="file"> direkt an <body> und will
+	// es per Klasse "visually-hidden" verstecken - die ist aber nur
+	// innerhalb von ".awesomplete" definiert (siehe
+	// scss/common/awesomeplete.scss) und greift hier ueberhaupt nicht. Beim
+	// erfolgreichen Foto faellt das nicht auf, weil das Element im
+	// onchange-Handler sofort wieder entfernt wird - bricht man den
+	// Kamera-/Datei-Dialog aber ab, feuert kein "change"-Event, das Element
+	// bleibt also nie entfernt UND sichtbar als kaputtes Formularfeld auf
+	// der Seite stehen (genau das vom Nutzer beobachtete Bild).
+	//
+	// this.input existiert nur im Mobil-Pfad (show_for_mobile) und wird dort
+	// synchron gesetzt, bevor click() das native Kamera-/Datei-Menue oeffnet
+	// - direkt danach ist es also bereits verfuegbar.
+	const input = capture.input;
+	if (!input) return;
+
+	Object.assign(input.style, {
+		position: 'fixed',
+		top: '-9999px',
+		left: '-9999px',
+		opacity: '0',
+		pointerEvents: 'none',
+	});
+
+	const remove_if_cancelled = () => {
+		window.removeEventListener('focus', remove_if_cancelled);
+		// Verzoegert, weil der Fokus schon zurueck ist, bevor der Browser
+		// files/onchange bei einer echten Auswahl fertig verarbeitet hat.
+		setTimeout(() => {
+			if (input.isConnected && !input.files.length) {
+				input.remove();
+			}
+		}, 500);
+	};
+	window.addEventListener('focus', remove_if_cancelled, { once: true });
 }
 
 function upload_captured_image(frm, fieldname, data_url) {
