@@ -21,9 +21,20 @@ frappe.ui.form.on('Project', {
 });
 
 function start_fahrt_mit_timer(frm) {
+	// frappe.new_doc navigiert direkt zum vollen Formular (kein Quick-Entry-
+	// Popup, das ist bei "Fahrt" nicht aktiviert) und loest sein Promise erst,
+	// wenn diese Navigation fertig ist - cur_frm zeigt danach zuverlaessig auf
+	// das neue Fahrt-Formular. Sofortiges Speichern, aus demselben Grund wie
+	// der Timer im Fahrt-Formular selbst (siehe fahrtenbuch.js): eine neue,
+	// ungespeicherte Fahrt existiert nur im Browser und ginge bei einem
+	// Reload/Schliessen der Seite verloren.
 	frappe.new_doc('Fahrt', {
 		project: frm.doc.name,
 		customer: frm.doc.customer,
 		start_time: frappe.datetime.now_datetime(),
+	}).then(() => {
+		if (cur_frm && cur_frm.doctype === 'Fahrt' && cur_frm.is_new()) {
+			cur_frm.save();
+		}
 	});
 }

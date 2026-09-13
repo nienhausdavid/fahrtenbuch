@@ -97,19 +97,25 @@ frappe.ui.form.on('Fahrt', {
 
 // Timer fuer die Fahrzeit - reine Komfortfunktion obendrauf auf start_time/
 // end_time, die ganz normale, jederzeit von Hand editierbare Felder bleiben
-// (kein read-only). "Start" setzt start_time auf jetzt, "Stopp" end_time auf
-// jetzt; dazwischen laeuft eine Live-Anzeige der verstrichenen Zeit.
+// (kein read-only). "Start"/"Stopp" speichern sofort (wie ERPNexts eigener
+// Timesheet-Timer in erpnext/public/js/projects/timer.js: frm.save() direkt
+// nach dem Setzen von from_time) - end_time/Kilometerstaende/Auftrag/Artikel
+// sind deshalb nicht mehr reqd im Feld, sondern erst in Fahrt.before_submit
+// (fahrt.py) Pflicht, sonst waere ein Entwurf mit nur laufendem Timer gar
+// nicht speicherbar. Ohne das sofortige Speichern ginge der Timer bei einem
+// Reload/Schliessen der Seite verloren, weil ein neues, ungespeichertes
+// Dokument nur im Browser existiert.
 function update_timer_toolbar(frm) {
 	stop_ticking(frm);
 	if (frm.doc.docstatus !== 0) return;
 
 	if (!frm.doc.start_time) {
-		frm.add_custom_button(__('Timer starten'), () => {
-			frm.set_value('start_time', frappe.datetime.now_datetime()).then(() => update_timer_toolbar(frm));
+		frm.page.add_button(__('Timer starten'), () => {
+			frm.set_value('start_time', frappe.datetime.now_datetime()).then(() => frm.save());
 		});
 	} else if (!frm.doc.end_time) {
-		frm.add_custom_button(__('Timer stoppen'), () => {
-			frm.set_value('end_time', frappe.datetime.now_datetime()).then(() => update_timer_toolbar(frm));
+		frm.page.add_button(__('Timer stoppen'), () => {
+			frm.set_value('end_time', frappe.datetime.now_datetime()).then(() => frm.save());
 		});
 		start_ticking(frm);
 	}

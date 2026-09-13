@@ -113,6 +113,24 @@ wechseln sollte, muss nur diese eine Funktion angepasst werden.
 
 ---
 
+## Timer
+
+"Timer starten"/"Timer stoppen" (im Formular und beim Anlegen aus dem
+Projekt heraus) setzen nicht nur `start_time`/`end_time`, sondern **speichern
+sofort** — genau wie ERPNexts eigener Timesheet-Timer
+(`erpnext/public/js/projects/timer.js`, ruft nach dem Setzen von `from_time`
+ebenfalls direkt `frm.save()` auf). Ohne das sofortige Speichern ginge ein
+laufender Timer bei einem Reload oder Schliessen der Seite verloren, weil ein
+neues, ungespeichertes Dokument nur im Browser existiert.
+
+Damit ein Entwurf mit nur laufendem Timer überhaupt speicherbar ist, sind
+Endzeit, beide Kilometerstände, Auftrag und Artikel Fahrzeit **nicht mehr auf
+Feldebene Pflicht** — sie werden erst beim Buchen selbst geprüft
+(`Fahrt.before_submit` in `fahrt.py`), mit einer klaren Fehlermeldung, falls
+etwas fehlt.
+
+---
+
 ## Vor der Installation anpassen
 
 In `pyproject.toml` und `fahrtenbuch/hooks.py` Name, E-Mail und Beschreibung

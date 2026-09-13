@@ -6,12 +6,30 @@ from frappe.utils import flt, get_datetime, time_diff_in_hours
 
 class Fahrt(Document):
 	def validate(self):
-		self.pruefe_zeiten_und_kilometerstand()
-		self.distance_km = self.end_odometer - self.start_odometer
-		self.duration_hours = flt(time_diff_in_hours(self.end_time, self.start_time), 2)
+		"""End/Kilometerstand sind erst beim Buchen Pflicht (siehe
+		before_submit) - beim blossen Speichern als Entwurf, z. B. durch den
+		Timer ("Timer starten" speichert sofort, damit die Startzeit einen
+		Reload uebersteht), sind sie oft noch leer. Deshalb hier nur rechnen/
+		pruefen, wenn beide Werte eines Paars tatsaechlich vorliegen."""
+		if self.start_time and self.end_time:
+			if get_datetime(self.end_time) <= get_datetime(self.start_time):
+				frappe.throw(_("Das Ende muss nach dem Beginn liegen."))
+			self.duration_hours = flt(time_diff_in_hours(self.end_time, self.start_time), 2)
 
-	def pruefe_zeiten_und_kilometerstand(self):
-		if get_datetime(self.end_time) <= get_datetime(self.start_time):
-			frappe.throw(_("Das Ende muss nach dem Beginn liegen."))
-		if self.end_odometer < self.start_odometer:
-			frappe.throw(_("Der Kilometerstand am Ende darf nicht kleiner als am Anfang sein."))
+		if self.start_odometer is not None and self.end_odometer is not None:
+			if self.end_odometer < self.start_odometer:
+				frappe.throw(_("Der Kilometerstand am Ende darf nicht kleiner als am Anfang sein."))
+			self.distance_km = self.end_odometer - self.start_odometer
+
+	def before_submit(self):
+		"""Was zum Buchen fehlen darf, aber nicht zum Buchen selbst: hier statt
+		als reqd im Feld, damit ein Entwurf (z. B. per Timer gestartet, noch
+		mitten in der Fahrt) jederzeit speicherbar bleibt."""
+		if not self.end_time:
+			frappe.throw(_("Bitte vor dem Buchen eine Endzeit eintragen."))
+		if self.start_odometer is None or self.end_odometer is None:
+			frappe.throw(_("Bitte vor dem Buchen beide Kilometerstände eintragen."))
+		if not self.sales_order:
+			frappe.throw(_("Bitte vor dem Buchen einen Auftrag wählen."))
+		if not self.time_item:
+			frappe.throw(_("Bitte vor dem Buchen einen Artikel für die Fahrzeit wählen."))

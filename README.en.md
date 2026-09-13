@@ -111,6 +111,23 @@ change later, only this one function needs to change.
 
 ---
 
+## Timer
+
+"Start Timer"/"Stop Timer" (on the form, and when creating a trip from the
+Project) don't just set `start_time`/`end_time` - they **save immediately**,
+exactly like ERPNext's own Timesheet timer
+(`erpnext/public/js/projects/timer.js`, which also calls `frm.save()` right
+after setting `from_time`). Without saving immediately, a running timer would
+be lost on a reload or when closing the page, since a new, unsaved document
+only exists in the browser.
+
+For a draft with just a running timer to be savable at all, end time, both
+odometer readings, sales order, and time item are **no longer required at
+the field level** - they're checked only on submit (`Fahrt.before_submit` in
+`fahrt.py`), with a clear error message if something's missing.
+
+---
+
 ## Before Installing
 
 Fill in name, email, and description in `pyproject.toml` and

@@ -99,10 +99,10 @@
    "reqd": 1
   },
   {
+   "description": "Muss vor dem Buchen gesetzt sein - beim Speichern als Entwurf (z. B. per Timer) noch nicht erforderlich",
    "fieldname": "end_time",
    "fieldtype": "Datetime",
-   "label": "Ende",
-   "reqd": 1
+   "label": "Ende"
   },
   {
    "fieldname": "column_break_2",
@@ -147,10 +147,10 @@
    "label": "Foto Kilometerstand Start"
   },
   {
+   "description": "Muss vor dem Buchen gesetzt sein",
    "fieldname": "start_odometer",
    "fieldtype": "Int",
-   "label": "Kilometerstand Start",
-   "reqd": 1
+   "label": "Kilometerstand Start"
   },
   {
    "fieldname": "column_break_4",
@@ -163,10 +163,10 @@
    "label": "Foto Kilometerstand Ende"
   },
   {
+   "description": "Muss vor dem Buchen gesetzt sein",
    "fieldname": "end_odometer",
    "fieldtype": "Int",
-   "label": "Kilometerstand Ende",
-   "reqd": 1
+   "label": "Kilometerstand Ende"
   },
   {
    "fieldname": "distance_km",
@@ -190,20 +190,18 @@
    "label": "Abrechnung"
   },
   {
-   "description": "Pflichtfeld - die Fahrzeit wird immer darueber abgerechnet",
+   "description": "Muss vor dem Buchen gesetzt sein - die Fahrzeit wird immer darueber abgerechnet",
    "fieldname": "sales_order",
    "fieldtype": "Link",
    "label": "Sales Order",
-   "options": "Sales Order",
-   "reqd": 1
+   "options": "Sales Order"
   },
   {
-   "description": "Wird beim Buchen immer mit der Dauer (Std.) als Menge in den Auftrag uebernommen",
+   "description": "Muss vor dem Buchen gesetzt sein - wird dann immer mit der Dauer (Std.) als Menge in den Auftrag uebernommen",
    "fieldname": "time_item",
    "fieldtype": "Link",
    "label": "Artikel Fahrzeit",
-   "options": "Item",
-   "reqd": 1
+   "options": "Item"
   },
   {
    "fieldname": "column_break_5",
