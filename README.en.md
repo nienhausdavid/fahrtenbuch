@@ -32,12 +32,14 @@ fahrtenbuch/
     ├── public/
     │   ├── js/fahrtenbuch.js        # field defaults, Site Visit lookup, OCR trigger
     │   ├── js/fahrtenbuch_einstellungen.js  # "Fetch Available Models" button
+    │   ├── js/project.js            # "Start a Trip with Timer" button on the Project form
     │   └── images/fahrtenbuch-logo.svg
     ├── translations/
     │   └── en.csv                # English translation (app level, not inside the module folder!)
     └── fahrtenbuch/               # module folder
         ├── fahrtenbuch.py         # before_submit (billing) / get_odometer_reading / check_app_permission
         ├── ocr.py                 # reads the odometer via an OpenAI-compatible vision API
+        ├── project_dashboard.py   # adds "Trips" to the Project connections
         └── doctype/
             ├── fahrt/
             │   ├── fahrt.json       # main doctype "Fahrt" ("Trip"), submittable
@@ -169,6 +171,13 @@ bench --site <your-site> uninstall-app fahrtenbuch
   site visit — customer, project, and sales order are then filled in
   automatically. Loose coupling via the "Site Visit" doctype, no hard
   dependency.
+- The Project form now has a "Trips" group under its connections
+  (additive via `override_doctype_dashboards`, extends the existing list
+  instead of replacing it). There's also a dedicated **"Fahrt mit Timer
+  starten"** ("Start a Trip with Timer") button at the top of the Project
+  form — creates a new trip with the timer already running (project/customer
+  pre-filled), unlike the plain "+" connection, which creates an empty trip
+  with no timer started.
 
 ## Own App in the Desk
 

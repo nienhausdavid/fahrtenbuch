@@ -33,12 +33,14 @@ fahrtenbuch/
     ├── public/
     │   ├── js/fahrtenbuch.js        # Feld-Defaults, Site-Visit-Uebernahme, OCR-Trigger
     │   ├── js/fahrtenbuch_einstellungen.js  # "Modelle abrufen"-Button
+    │   ├── js/project.js            # "Fahrt mit Timer starten"-Button auf dem Projekt-Formular
     │   └── images/fahrtenbuch-logo.svg
     ├── translations/
     │   └── en.csv                # Englische Uebersetzung (App-Ebene, nicht im Modulordner!)
     └── fahrtenbuch/               # Modulordner
         ├── fahrtenbuch.py         # before_submit (Abrechnung) / get_odometer_reading / check_app_permission
         ├── ocr.py                 # Kilometerstand per OpenAI-kompatibler Vision-API erkennen
+        ├── project_dashboard.py   # ergaenzt "Fahrten" in den Projekt-Verknuepfungen
         └── doctype/
             ├── fahrt/
             │   ├── fahrt.json       # Haupt-Doctype, submittable
@@ -172,6 +174,13 @@ bench --site <deine-site> uninstall-app fahrtenbuch
   lässt sich eine Fahrt optional mit einem Kundeneinsatz verknüpfen — Kunde,
   Projekt und Auftrag werden dann automatisch übernommen. Lose Kopplung über
   die Doctype "Site Visit", keine harte Abhängigkeit.
+- Im Projekt-Formular gibt es unter "Verknüpfungen" jetzt eine Gruppe
+  "Fahrten" (additiv über `override_doctype_dashboards`, ergänzt die
+  bestehende Liste statt sie zu ersetzen). Zusätzlich ein eigener Button
+  **"Fahrt mit Timer starten"** oben im Projekt-Formular — legt direkt eine
+  neue Fahrt mit bereits laufendem Timer an (Projekt/Kunde vorbelegt), anders
+  als die normale "+"-Verknüpfung, die eine leere Fahrt ohne gestarteten
+  Timer anlegt.
 
 ## Eigene App im Desk
 

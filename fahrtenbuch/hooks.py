@@ -32,6 +32,7 @@ add_to_apps_screen = [
 doctype_js = {
 	"Fahrt": "public/js/fahrtenbuch.js",
 	"Fahrtenbuch Einstellungen": "public/js/fahrtenbuch_einstellungen.js",
+	"Project": "public/js/project.js",
 }
 
 # ---------------------------------------------------------------------------
@@ -48,6 +49,16 @@ doc_events = {
 	"Fahrt": {
 		"before_submit": "fahrtenbuch.fahrtenbuch.fahrtenbuch.before_submit",
 	},
+}
+
+# ---------------------------------------------------------------------------
+# Fahrt in der Verknuepfungen-Liste des Projekt-Formulars
+#
+# Additiv (siehe project_dashboard.get_data) - site_visit haengt sich hier
+# genauso ein, Frappe verkettet alle registrierten Hooks nacheinander.
+# ---------------------------------------------------------------------------
+override_doctype_dashboards = {
+	"Project": "fahrtenbuch.fahrtenbuch.project_dashboard.get_data",
 }
 
 # Kein after_install/before_uninstall: keine Custom Fields auf Kern-Doctypes,
