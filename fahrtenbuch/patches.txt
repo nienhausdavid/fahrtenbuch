@@ -1,1 +1,2 @@
 # Patches werden hier in Ausfuehrungsreihenfolge eingetragen
+fahrtenbuch.patches.set_project_trip_toggle_defaults
