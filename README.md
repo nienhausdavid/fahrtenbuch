@@ -108,6 +108,12 @@ konfiguriert oder erkennt nichts Eindeutiges, bleibt das Kilometerstand-Feld
 einfach leer bzw. unverändert — die Fahrt lässt sich immer ganz normal von
 Hand ausfüllen und buchen, die Erkennung ist reine Komfortfunktion.
 
+Echte Handy-Fotos werden vor dem Versand automatisch auf max. 1024px
+Kantenlänge herunterskaliert (`ocr.py`, `MAX_IMAGE_DIMENSION`). Ohne das
+haben mehrere MB grosse/16-Megapixel-Fotos im Test dazu geführt, dass die
+API entweder mit einer leeren Antwort oder gar nicht reagiert hat — mit
+verkleinertem Bild lief dieselbe Anfrage zuverlässig und korrekt durch.
+
 `ocr.py` ist bewusst ein eigenes, kleines Modul: falls das API-Format später
 wechseln sollte, muss nur diese eine Funktion angepasst werden.
 

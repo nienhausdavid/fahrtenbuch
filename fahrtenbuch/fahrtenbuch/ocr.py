@@ -1,15 +1,38 @@
 import base64
+import io
 import re
 
 import frappe
 import requests
 from frappe import _
+from PIL import Image
 
 PROMPT = (
 	"This is a photo of a car odometer (mileage display). What is the total "
 	"number of kilometers shown? Ignore any small decimal/tenths digit shown "
 	"in a different color. Respond with only the digits, nothing else."
 )
+
+# Handy-Kamerafotos kommen leicht mit 4000+ px Kantenlaenge und mehreren MB
+# daher - im Test hat das die API einmal mit einer leeren Nullwert-Antwort
+# (content: "") und einmal mit komplettem Totalausfall (Timeout) quittiert.
+# Erst nach Verkleinerung auf ~1024px kam eine korrekte Antwort. Deshalb hier
+# vorsorglich fuer jedes Foto, nicht erst als Reaktion auf einen Fehlschlag.
+MAX_IMAGE_DIMENSION = 1024
+
+
+def _downscale_to_jpeg(image_bytes: bytes) -> bytes:
+	"""Skaliert bei Bedarf herunter und kodiert dabei immer als JPEG neu -
+	nicht nur wenn tatsaechlich verkleinert wird, damit der MIME-Typ im
+	data:-URL unten (immer "image/jpeg") garantiert zum Inhalt passt, egal
+	welches Format das Original hatte."""
+	image = Image.open(io.BytesIO(image_bytes))
+	if max(image.size) > MAX_IMAGE_DIMENSION:
+		image.thumbnail((MAX_IMAGE_DIMENSION, MAX_IMAGE_DIMENSION))
+
+	buffer = io.BytesIO()
+	image.convert("RGB").save(buffer, format="JPEG", quality=85)
+	return buffer.getvalue()
 
 
 def _auth_headers(settings) -> dict:
@@ -63,7 +86,8 @@ def read_odometer(file_url: str) -> int | None:
 
 	file_doc = frappe.get_doc("File", {"file_url": file_url})
 	with open(file_doc.get_full_path(), "rb") as f:
-		image_b64 = base64.b64encode(f.read()).decode()
+		image_bytes = f.read()
+	image_b64 = base64.b64encode(_downscale_to_jpeg(image_bytes)).decode()
 
 	headers = {"Content-Type": "application/json", **_auth_headers(settings)}
 
@@ -88,8 +112,9 @@ def read_odometer(file_url: str) -> int | None:
 				"stream": False,
 			},
 			# Grosszuegig: ein kaltes, noch nicht geladenes Modell brauchte im
-			# Test 10-15s zusaetzlich zur eigentlichen Anfrage.
-			timeout=30,
+			# Test 10-15s zusaetzlich zur eigentlichen Anfrage, ein echtes
+			# (statt synthetisches) Testfoto weitere ca. 20s statt <2s.
+			timeout=45,
 		)
 		response.raise_for_status()
 		text = response.json()["choices"][0]["message"]["content"]

@@ -106,6 +106,12 @@ recognize anything clearly, the odometer field simply stays empty/unchanged —
 the trip can always be filled in and submitted by hand; recognition is a pure
 convenience feature.
 
+Real phone photos are automatically downscaled to at most 1024px on the
+longest side before being sent (`ocr.py`, `MAX_IMAGE_DIMENSION`). Without
+this, multi-MB/16-megapixel photos caused the API to either return an empty
+response or not respond at all in testing - the same request worked reliably
+and correctly once the image was downscaled.
+
 `ocr.py` is deliberately its own small module: if the API format should
 change later, only this one function needs to change.
 
