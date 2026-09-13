@@ -36,11 +36,13 @@ fahrtenbuch/
     │   └── en.csv                # English translation (app level, not inside the module folder!)
     └── fahrtenbuch/               # module folder
         ├── fahrtenbuch.py         # before_submit (billing) / get_odometer_reading / check_app_permission
-        ├── ocr.py                 # reads the odometer via an Ollama vision model
+        ├── ocr.py                 # reads the odometer via an OpenAI-compatible vision API
         └── doctype/
-            └── fahrt/
-                ├── fahrt.json       # main doctype "Fahrt" ("Trip"), submittable
-                └── fahrt.py         # controller (validates times/odometer, computes distance/duration)
+            ├── fahrt/
+            │   ├── fahrt.json       # main doctype "Fahrt" ("Trip"), submittable
+            │   └── fahrt.py         # controller (validates times/odometer, computes distance/duration)
+            └── fahrtenbuch_einstellungen/
+                └── fahrtenbuch_einstellungen.json   # single doctype: API URL/model/key
 ```
 
 No `install.py`: there are no custom fields on core doctypes and no other
@@ -75,29 +77,29 @@ too, otherwise it stays untranslated in English (German as the fallback).
 
 ## Odometer Recognition
 
-The app reads the odometer value from a dashboard photo via an AI vision
-model (`fahrtenbuch/ocr.py`) — configured by default for
-[Ollama](https://ollama.com/), reachable over a private network address (e.g.
-via [NetBird](https://netbird.io/) or another VPN mesh). The model itself
-does **not** run on the ERPNext server, but on any other device on the same
-network (tested with a Steam Deck).
+The app reads the odometer value from a dashboard photo via any
+**OpenAI-compatible API** (`fahrtenbuch/ocr.py`, chat completions format with
+an image) — works with [Ollama](https://ollama.com/) (your own server, on
+your own network, e.g. reachable via [NetBird](https://netbird.io/), tested
+with a Steam Deck as the host), LM Studio, or actual OpenAI.
 
-Configuration via `site_config.json` (both optional, with defaults):
+**Setup:** open the **"Fahrtenbuch Einstellungen"** doctype (search for it in
+the awesomebar) and fill in:
 
-```json
-{
-  "fahrtenbuch_ollama_url": "http://<ollama-server-ip>:11434",
-  "fahrtenbuch_ollama_model": "qwen3.5:9b"
-}
-```
+- **API URL**: base URL without `/chat/completions` at the end, e.g.
+  `http://<server-ip>:11434/v1` for Ollama or `https://api.openai.com/v1`
+- **Model**: e.g. `qwen3.5:9b`
+- **API Key**: only needed if the API requires one (leave empty for most
+  local/self-hosted servers)
 
-If the model is unreachable or doesn't recognize anything clearly, the
-odometer field simply stays empty/unchanged — the trip can always be filled
-in and submitted by hand; recognition is a pure convenience feature.
+**No defaults are shipped** — without an entry, automatic recognition is
+simply disabled. If the API is unreachable/not configured or doesn't
+recognize anything clearly, the odometer field simply stays empty/unchanged —
+the trip can always be filled in and submitted by hand; recognition is a pure
+convenience feature.
 
-`ocr.py` is deliberately its own small module: if a different model,
-provider, or a classic OCR engine (e.g. Tesseract) should be used later, only
-this one function needs to change.
+`ocr.py` is deliberately its own small module: if the API format should
+change later, only this one function needs to change.
 
 ---
 

@@ -1,0 +1,53 @@
+{
+ "actions": [],
+ "creation": "2026-09-13 09:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "api_url",
+  "model",
+  "api_key"
+ ],
+ "fields": [
+  {
+   "description": "Basis-URL einer OpenAI-kompatiblen API, ohne /chat/completions am Ende - z. B. http://<ip-des-servers>:11434/v1 fuer Ollama, oder https://api.openai.com/v1. Leer lassen, um die automatische Kilometerstand-Erkennung zu deaktivieren.",
+   "fieldname": "api_url",
+   "fieldtype": "Data",
+   "label": "API-URL"
+  },
+  {
+   "description": "Name des zu verwendenden Vision-Modells, z. B. qwen3.5:9b",
+   "fieldname": "model",
+   "fieldtype": "Data",
+   "label": "Modell"
+  },
+  {
+   "description": "Nur noetig, falls die API einen Schluessel verlangt (z. B. bei OpenAI selbst) - fuer die meisten lokal/selbst gehosteten Server leer lassen",
+   "fieldname": "api_key",
+   "fieldtype": "Password",
+   "label": "API-Schlüssel"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2026-09-13 09:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Fahrtenbuch",
+ "name": "Fahrtenbuch Einstellungen",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

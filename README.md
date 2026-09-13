@@ -37,11 +37,13 @@ fahrtenbuch/
     │   └── en.csv                # Englische Uebersetzung (App-Ebene, nicht im Modulordner!)
     └── fahrtenbuch/               # Modulordner
         ├── fahrtenbuch.py         # before_submit (Abrechnung) / get_odometer_reading / check_app_permission
-        ├── ocr.py                 # Kilometerstand per Ollama-Vision-Modell erkennen
+        ├── ocr.py                 # Kilometerstand per OpenAI-kompatibler Vision-API erkennen
         └── doctype/
-            └── fahrt/
-                ├── fahrt.json       # Haupt-Doctype, submittable
-                └── fahrt.py         # Controller (Zeiten/Kilometerstand pruefen, Distanz/Dauer berechnen)
+            ├── fahrt/
+            │   ├── fahrt.json       # Haupt-Doctype, submittable
+            │   └── fahrt.py         # Controller (Zeiten/Kilometerstand pruefen, Distanz/Dauer berechnen)
+            └── fahrtenbuch_einstellungen/
+                └── fahrtenbuch_einstellungen.json   # Single-Doctype: API-URL/Modell/Schluessel
 ```
 
 Kein `install.py`: Es gibt keine Custom Fields auf Kern-Doctypes und keine
@@ -76,30 +78,29 @@ ergänzen, sonst bleiben sie auf Englisch unübersetzt (Deutsch als Fallback).
 
 ## Kilometerstand-Erkennung
 
-Die App liest den Kilometerstand aus einem Tacho-Foto über ein
-KI-Vision-Modell aus (`fahrtenbuch/ocr.py`) — standardmäßig konfiguriert für
-[Ollama](https://ollama.com/), erreichbar über eine private Netzwerkadresse
-(z. B. per [NetBird](https://netbird.io/) oder einem anderen VPN-Mesh). Das
-Modell selbst läuft **nicht** auf dem ERPNext-Server, sondern auf einem
-beliebigen anderen Gerät im selben Netz (getestet mit einem Steam Deck).
+Die App liest den Kilometerstand aus einem Tacho-Foto über eine beliebige
+**OpenAI-kompatible API** aus (`fahrtenbuch/ocr.py`, Chat-Completions-Format
+mit Bild) — funktioniert damit z. B. mit [Ollama](https://ollama.com/) (eigener
+Server, eigenes Netz, z. B. per [NetBird](https://netbird.io/) erreichbar,
+getestet mit einem Steam Deck als Host), LM Studio, oder echtem OpenAI.
 
-Konfiguration über `site_config.json` (beide optional, mit Standardwerten):
+**Einrichtung:** Doctype **"Fahrtenbuch Einstellungen"** öffnen (Suche im
+Awesomebar) und ausfüllen:
 
-```json
-{
-  "fahrtenbuch_ollama_url": "http://<ip-des-ollama-servers>:11434",
-  "fahrtenbuch_ollama_model": "qwen3.5:9b"
-}
-```
+- **API-URL**: Basis-URL ohne `/chat/completions` am Ende, z. B.
+  `http://<ip-des-servers>:11434/v1` für Ollama oder `https://api.openai.com/v1`
+- **Modell**: z. B. `qwen3.5:9b`
+- **API-Schlüssel**: nur nötig, falls die API einen verlangt (bei den meisten
+  lokal/selbst gehosteten Servern leer lassen)
 
-Ist das Modell nicht erreichbar oder erkennt nichts Eindeutiges, bleibt das
-Kilometerstand-Feld einfach leer bzw. unverändert — die Fahrt lässt sich immer
-ganz normal von Hand ausfüllen und buchen, die Erkennung ist reine
-Komfortfunktion.
+**Keine Standardwerte hinterlegt** — ohne Eintrag bleibt die automatische
+Erkennung schlicht deaktiviert. Ist die API nicht erreichbar/nicht
+konfiguriert oder erkennt nichts Eindeutiges, bleibt das Kilometerstand-Feld
+einfach leer bzw. unverändert — die Fahrt lässt sich immer ganz normal von
+Hand ausfüllen und buchen, die Erkennung ist reine Komfortfunktion.
 
-`ocr.py` ist bewusst ein eigenes, kleines Modul: falls später ein anderes
-Modell, ein anderer Anbieter oder eine klassische OCR-Engine (z. B. Tesseract)
-zum Einsatz kommen soll, muss nur diese eine Funktion angepasst werden.
+`ocr.py` ist bewusst ein eigenes, kleines Modul: falls das API-Format später
+wechseln sollte, muss nur diese eine Funktion angepasst werden.
 
 ---
 
