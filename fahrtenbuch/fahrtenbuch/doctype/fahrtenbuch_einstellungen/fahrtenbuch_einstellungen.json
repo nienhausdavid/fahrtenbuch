@@ -3,6 +3,7 @@
  "creation": "2026-09-13 09:00:00.000000",
  "doctype": "DocType",
  "engine": "InnoDB",
+ "icon": "settings",
  "field_order": [
   "api_url",
   "model",
