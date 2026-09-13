@@ -176,11 +176,14 @@ bench --site <deine-site> uninstall-app fahrtenbuch
   die Doctype "Site Visit", keine harte Abhängigkeit.
 - Im Projekt-Formular gibt es unter "Verknüpfungen" jetzt eine Gruppe
   "Fahrten" (additiv über `override_doctype_dashboards`, ergänzt die
-  bestehende Liste statt sie zu ersetzen). Zusätzlich ein eigener Button
-  **"Fahrt mit Timer starten"** oben im Projekt-Formular — legt direkt eine
-  neue Fahrt mit bereits laufendem Timer an (Projekt/Kunde vorbelegt), anders
-  als die normale "+"-Verknüpfung, die eine leere Fahrt ohne gestarteten
-  Timer anlegt.
+  bestehende Liste statt sie zu ersetzen). Die "+"-Verknüpfung dort legt eine
+  neue Fahrt mit bereits laufendem Timer an (Projekt/Kunde vorbelegt,
+  Startzeit = jetzt) — über `frm.make_methods` (Frappes eigener
+  Erweiterungspunkt für `Form.make_new()`) statt der Standard-Vorbelegung,
+  die nur das Projekt-Feld setzen würde. Zusätzlich ein eigenständig
+  sichtbarer Button **"Fahrt mit Timer starten"** oben im Formular
+  (`frm.page.add_button`, landet nicht in der "..."-Sammelablage) mit
+  demselben Effekt.
 
 ## Eigene App im Desk
 
